@@ -30,3 +30,37 @@ def normalize_image(image_input):
     except Exception:
         pass
     return img
+
+def get_phash(image_path):
+    img = normalize_image(image_path)
+    return imagehash.phash(img)
+
+def get_ahash(image_path):
+    img = normalize_image(image_path)
+    return imagehash.average_hash(img)
+
+def get_dhash(image_path):
+    img = normalize_image(image_path)
+    return imagehash.dhash(img)
+def get_five_crops(img):
+    #generate 5 crops for robust embedding
+    width,height = img.size
+    crop_size = min(width,height)//2
+
+    #defining boxes
+    center_x,center_y = width // 2,height //2
+    half_crop = crop_size // 2
+
+    crops = [
+        # Center
+        img.crop((center_x - half_crop, center_y - half_crop, center_x + half_crop, center_y + half_crop)),
+        # Top-Left
+        img.crop((0, 0, crop_size, crop_size)),
+        # Top-Right
+        img.crop((width - crop_size, 0, width, crop_size)),
+        # Bottom-Left
+        img.crop((0, height - crop_size, crop_size, height)),
+        # Bottom-Right
+        img.crop((width - crop_size, height - crop_size, width, height))
+    ]
+    return crops
