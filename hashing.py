@@ -79,5 +79,48 @@ def scale_image(img,size):
     #Accepts PIL Image object
     return img.resize(size,Image.Resampling.LANCZOS)
 
-
+def apply_filter(img, filter_type):
+    """
+    Apply various filters to image
+    Supported filters: blur, sharpen, edge, smooth, grayscale, sepia, brightness, contrast
+    Accepts PIL Image object
+    """
+    if filter_type == 'blur':
+        return img.filter(ImageFilter.GaussianBlur(radius=2))
+    elif filter_type == 'sharpen':
+        return img.filter(ImageFilter.SHARPEN)
+    elif filter_type == 'edge':
+        return img.filter(ImageFilter.FIND_EDGES)
+    elif filter_type == 'smooth':
+        return img.filter(ImageFilter.SMOOTH_MORE)
+    elif filter_type == 'grayscale':
+        return img.convert('L')
+    elif filter_type == 'sepia':
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+        pixels = img.load()
+        width, height = img.size
+        # Note: Iterate carefully or use matrix transform for speed, but this works for now
+        # A matrix approach is much faster:
+        # matrix = ( 0.393, 0.769, 0.189, 0,
+        #            0.349, 0.686, 0.168, 0,
+        #            0.272, 0.534, 0.131, 0 )
+        # return img.convert("RGB", matrix) 
+        # But keeping original logic behavior for now
+        for y in range(height):
+            for x in range(width):
+                r, g, b = pixels[x, y][:3]
+                tr = int(0.393 * r + 0.769 * g + 0.189 * b)
+                tg = int(0.349 * r + 0.686 * g + 0.168 * b)
+                tb = int(0.272 * r + 0.534 * g + 0.131 * b)
+                pixels[x, y] = (min(255, tr), min(255, tg), min(255, tb))
+        return img
+    elif filter_type == 'brightness':
+        enhancer = ImageEnhance.Brightness(img)
+        return enhancer.enhance(1.3)
+    elif filter_type == 'contrast':
+        enhancer = ImageEnhance.Contrast(img)
+        return enhancer.enhance(1.5)
+    
+    return img
     
