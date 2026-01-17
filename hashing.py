@@ -64,3 +64,94 @@ def get_five_crops(img):
         img.crop((width - crop_size, height - crop_size, width, height))
     ]
     return crops
+
+def get_whash(image_path):
+    img = normalize_image(image_path)
+    return imagehash.whash(img)
+
+def crop_image(img,crop_coords):
+    #Crop image with coordinates (left, top, right, bottom)
+    #Accepts PIL Image object
+    return img.crop(crop_coords)
+
+def scale_image(img,size):
+    #Scale image to specified size (width, height)
+    #Accepts PIL Image object
+    return img.resize(size,Image.Resampling.LANCZOS)
+
+def apply_filter(img, filter_type):
+
+    #Apply various filters to image
+    #Supported filters: blur, sharpen, edge, smooth, grayscale, sepia, brightness, contrast
+    #Accepts PIL Image object
+    
+    if filter_type == 'blur':
+        return img.filter(ImageFilter.GaussianBlur(radius=2))
+    elif filter_type == 'sharpen':
+        return img.filter(ImageFilter.SHARPEN)
+    elif filter_type == 'edge':
+        return img.filter(ImageFilter.FIND_EDGES)
+    elif filter_type == 'smooth':
+        return img.filter(ImageFilter.SMOOTH_MORE)
+    elif filter_type == 'grayscale':
+        return img.convert('L')
+    elif filter_type == 'sepia':
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+        pixels = img.load()
+        width, height = img.size
+        # Note: Iterate carefully or use matrix transform for speed, but this works for now
+        # A matrix approach is much faster:
+        # matrix = ( 0.393, 0.769, 0.189, 0,
+        #            0.349, 0.686, 0.168, 0,
+        #            0.272, 0.534, 0.131, 0 )
+        # return img.convert("RGB", matrix) 
+        # But keeping original logic behavior for now
+        for y in range(height):
+            for x in range(width):
+                r, g, b = pixels[x, y][:3]
+                tr = int(0.393 * r + 0.769 * g + 0.189 * b)
+                tg = int(0.349 * r + 0.686 * g + 0.168 * b)
+                tb = int(0.272 * r + 0.534 * g + 0.131 * b)
+                pixels[x, y] = (min(255, tr), min(255, tg), min(255, tb))
+        return img
+    elif filter_type == 'brightness':
+        enhancer = ImageEnhance.Brightness(img)
+        return enhancer.enhance(1.3)
+    elif filter_type == 'contrast':
+        enhancer = ImageEnhance.Contrast(img)
+        return enhancer.enhance(1.5)
+    
+    return img
+    
+def process_image(image_path, crop_coords=None, scale_size=None, filter_type=None):
+    """
+    Process image with multiple operations (crop, scale, filter)
+    """
+    img = Image.open(image_path)
+    
+    if crop_coords:
+        img = crop_image(img, crop_coords)
+    
+    if scale_size:
+        img = scale_image(img, scale_size)
+        
+    if filter_type:
+        img = apply_filter(img, filter_type)
+    
+    # Save processed image
+    # Note: For temporary processing, we don't strictly need a persistent 'processed' folder anymore.
+    # But to avoid breaking legacy code that expects a path, we will save to 'uploads' or a temp dir.
+    # For now, let's just use 'uploads' to keep it simple, or 'temp'.
+    
+    # Using 'uploads' as the unified storage to avoid confusion
+    output_filename = f"temp_{uuid.uuid4()}.jpg"
+    output_path = f"uploads/{output_filename}"
+    
+    # Ensure mode is supported for JPEG (e.g. convert RGBA to RGB)
+    if img.mode in ('RGBA', 'P'):
+        img = img.convert('RGB')
+        
+    img.save(output_path, quality=95)
+    
+    return output_path   
