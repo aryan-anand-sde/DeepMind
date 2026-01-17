@@ -147,3 +147,68 @@ async def test_robustness(
     except Exception as e:
         traceback.print_exc()
         raise e
+    
+
+
+@app.get("/image/{image_id}")
+async def get_image(image_id:str):
+    """Retrieve a processed image"""
+
+    if ".." in image_id or "/" in image_id or "\\" in image_id:
+        return {"error":"Invalid filename"}
+    
+    file_path_processed=f"processed/{image_id}"
+    file_path_upload= f"uploads/{image_id}"
+
+    if os.path.exists(file_path_processed):
+        return FileResponse(file_path_processed)
+    if os.path.exists(file_path_upload):
+        return FileResponse(file_path_upload)
+    
+    return {"error":"Image not found"}
+
+
+
+
+@app.get("/files/{folder}/{filename}")
+async def get_file(folder:str, filename:str):
+    if folder not in ["uploads","processed"]:
+        return {"error":"Access denied"}
+    
+    path=f"{folder}/{filename}"
+    if os.path.exists(path):
+        return FileResponse(path)
+    
+    return {"error":"File not found"}
+
+app.mount("/uploads",StaticFiles(directory="uploads"),name="uploads")
+
+
+
+from detector import is_duplicate, check_similarity, get_cluster
+
+
+
+@app.get("/lineage/{filename}")
+async def get_lineage(filename:str):
+    """Get all images related to the given filename(Cluster)"""
+
+    path= f"uploads/{filename}"
+    if not os.path.exists(path):
+        path=f"processed/{filename}"
+
+    
+    if not os.path.exists(path):
+
+        if os.path.exists(filename):
+            path=filename
+        
+        else:
+            return{"status":"error", "message":"File not found"}
+        
+    
+    cluster=get_cluster(path)
+
+    return {"status":"success", "cluster":cluster}
+
+app.mount("/",StaticFiles(directory="../frontend", html=True),name="frontend")
