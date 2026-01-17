@@ -80,11 +80,11 @@ def scale_image(img,size):
     return img.resize(size,Image.Resampling.LANCZOS)
 
 def apply_filter(img, filter_type):
-    """
-    Apply various filters to image
-    Supported filters: blur, sharpen, edge, smooth, grayscale, sepia, brightness, contrast
-    Accepts PIL Image object
-    """
+
+    #Apply various filters to image
+    #Supported filters: blur, sharpen, edge, smooth, grayscale, sepia, brightness, contrast
+    #Accepts PIL Image object
+    
     if filter_type == 'blur':
         return img.filter(ImageFilter.GaussianBlur(radius=2))
     elif filter_type == 'sharpen':
@@ -124,3 +124,34 @@ def apply_filter(img, filter_type):
     
     return img
     
+def process_image(image_path, crop_coords=None, scale_size=None, filter_type=None):
+    """
+    Process image with multiple operations (crop, scale, filter)
+    """
+    img = Image.open(image_path)
+    
+    if crop_coords:
+        img = crop_image(img, crop_coords)
+    
+    if scale_size:
+        img = scale_image(img, scale_size)
+        
+    if filter_type:
+        img = apply_filter(img, filter_type)
+    
+    # Save processed image
+    # Note: For temporary processing, we don't strictly need a persistent 'processed' folder anymore.
+    # But to avoid breaking legacy code that expects a path, we will save to 'uploads' or a temp dir.
+    # For now, let's just use 'uploads' to keep it simple, or 'temp'.
+    
+    # Using 'uploads' as the unified storage to avoid confusion
+    output_filename = f"temp_{uuid.uuid4()}.jpg"
+    output_path = f"uploads/{output_filename}"
+    
+    # Ensure mode is supported for JPEG (e.g. convert RGBA to RGB)
+    if img.mode in ('RGBA', 'P'):
+        img = img.convert('RGB')
+        
+    img.save(output_path, quality=95)
+    
+    return output_path   
