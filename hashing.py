@@ -64,3 +64,20 @@ def get_five_crops(img):
         img.crop((width - crop_size, height - crop_size, width, height))
     ]
     return crops
+
+def get_whash(image_path):
+    img = normalize_image(image_path)
+    return imagehash.whash(img)
+
+def crop_image(img,crop_coords):
+    #Crop image with coordinates (left, top, right, bottom)
+    #Accepts PIL Image object
+    return img.crop(crop_coords)
+
+def scale_image(img,size):
+    #Scale image to specified size (width, height)
+    #Accepts PIL Image object
+    return img.resize(size,Image.Resampling.LANCZOS)
+
+
+    
