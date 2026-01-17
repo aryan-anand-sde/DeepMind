@@ -24,7 +24,7 @@ async def upload_image(file: UploadFile=File(...)):
     with open(temp_path,"wb") as buffer:
         shutil.copyfileobj(file.file,buffer)
 
-    is_dup, original_path=is_duplicate(temp_path)
+    is_dup, original_path,reason=is_duplicate(temp_path)
 
     if is_dup:
         if not os.path.exists(original_path):
@@ -101,4 +101,49 @@ async def test_robustness(
     scale_height:int=Form(None),
     filter_type:str=Form(None)
 ):
-    """"""
+    """
+    Test robustness: Upload image,apply transformations, then check similarity between original and modified.
+    """
+
+    try:
+        original_path=f"uploads/{uuid.uuid4()}_original_{file.filename}"
+        with open(original_path,"wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        crop_coords=None
+        if crop:
+            crop_coords=tuple(map(int, crop.split(',')))
+
+        scale_size=(scale_width, scale_height) if (scale_width and scale_height) else None
+
+        modified_path=process_image(
+            original_path,
+            crop_coords=crop_coords,
+            scale_size=scale_size,
+            filter_type=filter_type
+        )
+
+        confidence_score, hash_distances, is_similar, feature_score, clip_score= check_similarity(original_path, modified_path)
+
+        return{
+            "status":"success",
+            "original_path":original_path,
+            "modified_path":modified_path,
+            "similarity_results":{
+                "confidence_score":float(confidence_score),
+                "clip_score":float(clip_score),
+                "hash_distances":hash_distances,
+                "phash_distance":int(hash_distances['phash']),
+                "feature_score":int(feature_score),
+                "is_similar":bool(is_similar)
+
+            },
+            "parametres":{
+                "crop":str(crop_coords) if crop_coords else None,
+                "scale":str(scale_size) if scale_size else None,
+                "filter":filter_type
+            }
+        }
+    except Exception as e:
+        traceback.print_exc()
+        raise e
