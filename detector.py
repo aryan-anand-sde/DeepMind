@@ -176,3 +176,48 @@ def add_image(image_path):
         'whash': w_hash,
         'path': image_path
     })
+
+
+def check_similarity(image_path1, image_path2):
+    """
+    Compare two images and return similarity metrics
+    Returns: (confidence_score, hash_distances, is_similar, feature_score, clip_score)
+    """
+    # 1. Calculate Bag of Hashes
+    p1 = get_phash(image_path1)
+    d1 = get_dhash(image_path1)
+    w1 = get_whash(image_path1)
+    
+    p2 = get_phash(image_path2)
+    d2 = get_dhash(image_path2)
+    w2 = get_whash(image_path2)
+    
+    hash_distances = {
+        "phash": abs(p1 - p2),
+        "dhash": abs(d1 - d2),
+        "whash": abs(w1 - w2)
+    }
+    
+    # 2. Get embeddings & CLIP Score
+    emb1 = get_embedding(image_path1)
+    emb2 = get_embedding(image_path2)
+    
+    import numpy as np
+    clip_score = np.dot(emb1, emb2.T)[0][0]
+    
+    # 3. Feature Matching (ORB)
+    feature_score = match_features(image_path1, image_path2)
+    
+    # 4. Calculate Confidence Score
+    confidence_score = calculate_confidence(clip_score, feature_score)
+    
+    # 5. Determine if similar
+    # Match if any hash is close OR confidence score is high
+    is_similar = (
+        (hash_distances['phash'] < PHASH_THRESHOLD) or 
+        (hash_distances['dhash'] < DHASH_THRESHOLD) or 
+        (hash_distances['whash'] < WHASH_THRESHOLD) or 
+        (confidence_score > CONFIDENCE_THRESHOLD)
+    )
+
+    return confidence_score, hash_distances, is_similar, feature_score, clip_score
