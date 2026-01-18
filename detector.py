@@ -150,3 +150,29 @@ def is_duplicate(image_path):
         }
         
         return True, final_match, reason
+    # Save to DB if unique
+    add_vector(emb, image_path)
+    hash_db.append({
+        'phash': p_hash,
+        'dhash': d_hash,
+        'whash': w_hash,
+        'path': image_path
+    })
+    
+    return False, None, None
+
+def add_image(image_path):
+    
+    p_hash = get_phash(image_path)
+    d_hash = get_dhash(image_path)
+    w_hash = get_whash(image_path)
+    
+    emb = get_embedding(image_path)
+    add_vector(emb, image_path)
+    
+    hash_db.append({
+        'phash': p_hash,
+        'dhash': d_hash,
+        'whash': w_hash,
+        'path': image_path
+    })
