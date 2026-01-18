@@ -6,7 +6,7 @@ from fastapi import Request
 from backend.hashing import process_image
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI,UploadFile,File,Form
-from backend.detector import is_Duplicate,check_similarity
+from backend.detector import is_duplicate, check_similarity, get_cluster
 from fastapi.responses import JSONResponse, FileResponse
 
 app=FastAPI()
@@ -184,11 +184,6 @@ async def get_file(folder:str, filename:str):
 app.mount("/uploads",StaticFiles(directory="uploads"),name="uploads")
 
 
-
-from detector import is_duplicate, check_similarity, get_cluster
-
-
-
 @app.get("/lineage/{filename}")
 async def get_lineage(filename:str):
     """Get all images related to the given filename(Cluster)"""
@@ -211,4 +206,4 @@ async def get_lineage(filename:str):
 
     return {"status":"success", "cluster":cluster}
 
-app.mount("/",StaticFiles(directory="../frontend", html=True),name="frontend")
+app.mount("/",StaticFiles(directory="frontend", html=True),name="frontend")

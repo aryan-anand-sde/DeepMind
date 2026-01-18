@@ -1,7 +1,7 @@
 import cv2
 from backend.hashing import get_phash, get_dhash, get_whash
-from model import get_embedding, get_robust_embedding
-from vectorDB import search, add_vector
+from backend.model import get_embedding, get_robust_embedding
+from backend.vectorDB import search, add_vector
 
 PHASH_THRESHOLD = 10
 DHASH_THRESHOLD = 10
