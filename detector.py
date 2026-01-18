@@ -49,3 +49,15 @@ def get_cluster(image_path):
             cluster.append(path)
             
     return cluster
+
+def calculate_confidence(clip_score, orb_matches):
+
+    # Normalize ORB matches (0 to 1)
+    norm_orb = min(orb_matches / MAX_ORB_MATCHES, 1.0)
+    
+    # Weighted Sum
+    # Ensure clip_score is not negative
+    clip_score = max(0, clip_score)
+    
+    final_score = (CLIP_WEIGHT * clip_score) + (ORB_WEIGHT * norm_orb)
+    return final_score
