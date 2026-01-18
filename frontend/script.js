@@ -95,24 +95,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   });
