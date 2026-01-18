@@ -221,3 +221,37 @@ def check_similarity(image_path1, image_path2):
     )
 
     return confidence_score, hash_distances, is_similar, feature_score, clip_score
+
+def match_features(path1, path2):
+
+    try:
+        img1 = cv2.imread(path1, cv2.IMREAD_GRAYSCALE)
+        img2 = cv2.imread(path2, cv2.IMREAD_GRAYSCALE)
+        
+        if img1 is None or img2 is None:
+            return 0
+
+        # Initialize ORB detector
+        orb = cv2.ORB_create(nfeatures=2000)
+
+        # Find keypoints and descriptors
+        kp1, des1 = orb.detectAndCompute(img1, None)
+        kp2, des2 = orb.detectAndCompute(img2, None)
+
+        if des1 is None or des2 is None:
+            return 0
+
+        # Match descriptors - BFMatcher with Hamming distance
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING)
+        matches = bf.knnMatch(des1, des2, k=2)
+
+        # Apply Lowe's Ratio Test
+        good_matches = []
+        for m, n in matches:
+            if m.distance < 0.75 * n.distance:
+                good_matches.append(m)
+        
+        return len(good_matches)
+    except Exception as e:
+        print(f"Error in matching features: {e}")
+        return 0
