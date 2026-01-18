@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepMind | Image Similarity Detector</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>DeepMind Duplicate Detector</h1>
+            <div class="subtitle">Upload an image to check for duplicates in the database.</div>
+        </header>
+
+        <div class="card" id="upload-section">
+            <form id="upload-form">
+                <div class="file-drop-area">
+                    <span class="file-msg">Drag & Drop or Click to Upload</span>
+                    <input type="file" name="file" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn" style="margin-top: 1.5rem;">Check & Upload</button>
+            </form>
+        </div>
+
+        <div id="result-view" style="display: none; margin-top: 2rem;">
+            <!-- Results will be injected here -->
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
