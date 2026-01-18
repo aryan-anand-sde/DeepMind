@@ -1,5 +1,5 @@
 import cv2
-from hashing import get_phash, get_dhash, get_whash
+from backend.hashing import get_phash, get_dhash, get_whash
 from model import get_embedding, get_robust_embedding
 from vectorDB import search, add_vector
 

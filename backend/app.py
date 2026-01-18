@@ -3,10 +3,10 @@ import uuid
 import shutil
 import traceback
 from fastapi import Request
-from hashing import process_image
+from backend.hashing import process_image
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI,UploadFile,File,Form
-from detector import is_Duplicate,check_similarity
+from backend.detector import is_Duplicate,check_similarity
 from fastapi.responses import JSONResponse, FileResponse
 
 app=FastAPI()
