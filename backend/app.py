@@ -40,10 +40,11 @@ async def upload_image(file: UploadFile=File(...)):
         original_path=original_path.replace("\\","/")
 
         return {
-            "status":"duplicate",
-            "original_image":original_path,
-            "message":"Duplicate detected.Storage optimized(pointer created).",
-            "storage_saved":True
+            "status": "duplicate",
+            "original_image": original_path,
+            "message": "Duplicate detected. Storage optimized (pointer created).",
+            "storage_saved": True,
+            "reason": reason
         }
     else:
         return {"status":"unique","message":"Image stored","image_path":temp_path}
