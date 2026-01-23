@@ -3,9 +3,9 @@ import os
 import glob
 import imagehash
 from PIL import Image
-from hashing import get_phash
-from model import get_robust_embedding
-from detector import check_similarity, calculate_confidence, match_features
+from backend.hashing import get_phash
+from backend.model import get_robust_embedding
+from backend.detector import check_similarity, calculate_confidence, match_features
 import numpy as np
 
 class LocalBenchmarkDB:
