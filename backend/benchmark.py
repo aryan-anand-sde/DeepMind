@@ -90,6 +90,82 @@ def run_benchmark(dataset_path):
     
     time_pixel = time.time() - start_time
 
+# --- Method 2: Perceptual Hash (Standard) ---
+    start_time = time.time()
+    matches_phash = 0
+    seen_hashes = []
+    
+    for img_path in images:
+        try:
+            h = get_phash(img_path)
+            is_dup = False
+            for existing_h in seen_hashes:
+                if abs(h - existing_h) < 10: # Threshold
+                    is_dup = True
+                    break
+            
+            if is_dup:
+                matches_phash += 1
+            else:
+                seen_hashes.append(h)
+        except Exception as e:
+            print(f"Error in pHash for {img_path}: {e}")
+
+    time_phash = time.time() - start_time
+
+  # --- Method 3: Our Model (CLIP + ORB) ---
+    start_time = time.time()
+    matches_our = 0
+    db = LocalBenchmarkDB()
+    
+    # Pre-load/embed first (Indexing phase) 
+    # Actually, in a real stream, we index one by one.
+    # We will simulate the "Check then Add" flow.
+    
+    for img_path in images:
+        try:
+            p_hash = get_phash(img_path)
+            vector = get_robust_embedding(img_path) # Depending on model.py impl
+            
+            is_dup, match_path = db.search(p_hash, vector, img_path)
+            
+            if is_dup:
+                matches_our += 1
+            else:
+                db.add(p_hash, vector, img_path)
+        except Exception as e:
+             print(f"Error in OurModel for {img_path}: {e}")
+
+    time_our = time.time() - start_time
+    
+    
+    
+    total = len(images)
+    
+    return [
+        {
+            "method": "Pixel Matching",
+            "description": "Baseline (Exact Identity)",
+            "matches_found": matches_pixel,
+            "speed_sec": round(time_pixel, 3),
+            "speed_per_100": round((time_pixel / total) * 100, 3) if total else 0
+        },
+        {
+            "method": "Perceptual Hash",
+            "description": "Industry Standard (pHash)",
+            "matches_found": matches_phash,
+            "speed_sec": round(time_phash, 3),
+            "speed_per_100": round((time_phash / total) * 100, 3) if total else 0
+        },
+        {
+            "method": "DeepMind Detector",
+            "description": "Our Model (CLIP + ORB)",
+            "matches_found": matches_our,
+            "speed_sec": round(time_our, 3),
+            "speed_per_100": round((time_our / total) * 100, 3) if total else 0
+        }
+    ]
+
 
 
 
