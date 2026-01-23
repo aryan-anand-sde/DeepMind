@@ -212,4 +212,39 @@ async def get_lineage(filename:str):
 
     return {"status":"success", "cluster":cluster}
 
+#adding benchmark 
+from benchmark import run_benchmark
+
+@app.post("/benchmark")
+async def benchmark_endpoint(folder_path: str = Form("benchmark_dataset")):
+    """
+    Run benchmark on the specified folder.
+    """
+    try:
+        # Validate path
+        real_path = folder_path
+        if not os.path.isabs(folder_path):
+             real_path = os.path.join(os.getcwd(), folder_path)
+             
+        if not os.path.exists(real_path):
+             # Try default if user typed something short
+             if os.path.exists(os.path.join("..", folder_path)):
+                 real_path = os.path.join("..", folder_path)
+             elif os.path.exists(os.path.join("backend", folder_path)):
+                 real_path = os.path.join("backend", folder_path)
+                 
+        if not os.path.exists(real_path):
+            return JSONResponse(status_code=400, content={"message": f"Folder not found: {folder_path}"})
+
+        results = run_benchmark(real_path)
+        
+        if "error" in results:
+             return JSONResponse(status_code=400, content={"message": results["error"]})
+             
+        return {"status": "success", "results": results}
+    except Exception as e:
+        traceback.print_exc()
+        return JSONResponse(status_code=500, content={"message": str(e)})
+
+
 app.mount("/",StaticFiles(directory="../frontend", html=True),name="frontend")
