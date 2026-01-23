@@ -6,7 +6,7 @@ from fastapi import Request
 from backend.hashing import process_image
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI,UploadFile,File,Form
-from backend.detector import is_duplicate, check_similarity, get_cluster
+from backend.detector import is_Duplicate,check_similarity
 from fastapi.responses import JSONResponse, FileResponse
 
 app=FastAPI()
@@ -185,6 +185,11 @@ async def get_file(folder:str, filename:str):
 app.mount("/uploads",StaticFiles(directory="uploads"),name="uploads")
 
 
+
+from detector import is_duplicate, check_similarity, get_cluster
+
+
+
 @app.get("/lineage/{filename}")
 async def get_lineage(filename:str):
     """Get all images related to the given filename(Cluster)"""
@@ -207,4 +212,39 @@ async def get_lineage(filename:str):
 
     return {"status":"success", "cluster":cluster}
 
-app.mount("/",StaticFiles(directory="frontend", html=True),name="frontend")
+#adding benchmark 
+from benchmark import run_benchmark
+
+@app.post("/benchmark")
+async def benchmark_endpoint(folder_path: str = Form("benchmark_dataset")):
+    """
+    Run benchmark on the specified folder.
+    """
+    try:
+        # Validate path
+        real_path = folder_path
+        if not os.path.isabs(folder_path):
+             real_path = os.path.join(os.getcwd(), folder_path)
+             
+        if not os.path.exists(real_path):
+             # Try default if user typed something short
+             if os.path.exists(os.path.join("..", folder_path)):
+                 real_path = os.path.join("..", folder_path)
+             elif os.path.exists(os.path.join("backend", folder_path)):
+                 real_path = os.path.join("backend", folder_path)
+                 
+        if not os.path.exists(real_path):
+            return JSONResponse(status_code=400, content={"message": f"Folder not found: {folder_path}"})
+
+        results = run_benchmark(real_path)
+        
+        if "error" in results:
+             return JSONResponse(status_code=400, content={"message": results["error"]})
+             
+        return {"status": "success", "results": results}
+    except Exception as e:
+        traceback.print_exc()
+        return JSONResponse(status_code=500, content={"message": str(e)})
+
+
+app.mount("/",StaticFiles(directory="../frontend", html=True),name="frontend")
