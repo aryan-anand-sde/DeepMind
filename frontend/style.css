@@ -7,8 +7,8 @@
   --text-muted: #94a3b8;
   --border-color: rgba(148, 163, 184, 0.1);
   --glass-border: 1px solid rgba(255, 255, 255, 0.1);
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --glow: 0 0 15px rgba(59, 130, 246, 0.5);
   --font-family: "Inter", system-ui, -apple-system, sans-serif;
 }
@@ -19,7 +19,8 @@ body {
   font-family: var(--font-family);
   margin: 0;
   min-height: 100vh;
-  background-image: radial-gradient(
+  background-image:
+    radial-gradient(
       circle at 10% 20%,
       rgba(59, 130, 246, 0.15) 0%,
       transparent 40%
@@ -315,9 +316,126 @@ select:focus {
   }
 }
 
+/* Spinner */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(59, 130, 246, 0.3);
+  border-left-color: var(--primary-color);
+  border-radius: 50%;
+  margin: 0 auto;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .result-container {
     grid-template-columns: 1fr;
   }
+}
+
+/* 
+   BENCHMARK / COMPARISON TABLE STYLES
+   Refined for Premium Grid Look
+*/
+
+.comparison-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 1.5rem;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.comparison-table th,
+.comparison-table td {
+  padding: 1.25rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Visible horizontal lines */
+  border-right: 1px solid rgba(255, 255, 255, 0.05); /* Subtle vertical lines */
+}
+
+/* Remove right border from last column */
+.comparison-table th:last-child,
+.comparison-table td:last-child {
+  border-right: none;
+}
+
+/* Remove bottom border from last row */
+.comparison-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Header Styles */
+.comparison-table th {
+  background: rgba(30, 41, 59, 0.9);
+  color: var(--text-color);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid rgba(59, 130, 246, 0.4);
+}
+
+/* First Column (Labels) */
+.comparison-table tr td:first-child,
+.comparison-table tr th:first-child {
+  text-align: left;
+  background: rgba(15, 23, 42, 0.8);
+  font-weight: 600;
+  color: var(--text-muted);
+  width: 20%;
+  padding-left: 1.5rem;
+}
+
+/* Last Column ("Our Model") Highlight */
+.comparison-table tr td:last-child,
+.comparison-table tr th:last-child {
+  background: rgba(59, 130, 246, 0.15); /* Distinct Blue Tint */
+  border-left: 1px solid rgba(59, 130, 246, 0.3);
+  position: relative;
+}
+
+/* Winner Header Effect */
+.comparison-table th:last-child {
+  color: #fff;
+  text-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+}
+
+/* Status Icons */
+.status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.status.success {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+}
+
+.status.fail {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+}
+
+/* Highlight Values (Speed/Matches) */
+.highlight-val {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary-color);
 }
