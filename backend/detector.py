@@ -1,7 +1,8 @@
 import cv2
-from backend.hashing import get_phash, get_dhash, get_whash
-from backend.model import get_embedding, get_robust_embedding
-from backend.vectorDB import search, add_vector
+from hashing import get_phash, get_dhash, get_whash
+from model import get_embedding, get_robust_embedding
+from vectorDB import search, add_vector
+
 
 PHASH_THRESHOLD = 10
 DHASH_THRESHOLD = 10
@@ -13,7 +14,7 @@ CLIP_WEIGHT = 0.6
 ORB_WEIGHT = 0.4
 MAX_ORB_MATCHES = 50  # Value to normalize ORB score (matches/50 capped at 1.0)
 
-
+# In-memory DB
 hash_db = []
 
 class UnionFind:
@@ -34,7 +35,7 @@ class UnionFind:
             self.parent[root_i] = root_j
 
 uf = UnionFind()
-path_to_id = {}
+path_to_id = {} # Map path to unique ID for UF
 
 def get_cluster(image_path):
     """Get all images in the same cluster/lineage as image_path"""
@@ -51,7 +52,10 @@ def get_cluster(image_path):
     return cluster
 
 def calculate_confidence(clip_score, orb_matches):
-
+    """
+    Calculate weighted confidence score.
+    Score = (0.6 * CLIP_Score) + (0.4 * Normalized_ORB_Score)
+    """
     # Normalize ORB matches (0 to 1)
     norm_orb = min(orb_matches / MAX_ORB_MATCHES, 1.0)
     
@@ -61,6 +65,8 @@ def calculate_confidence(clip_score, orb_matches):
     
     final_score = (CLIP_WEIGHT * clip_score) + (ORB_WEIGHT * norm_orb)
     return final_score
+
+
 
 def is_duplicate(image_path):
     """
@@ -80,6 +86,7 @@ def is_duplicate(image_path):
     min_hash_dist = float('inf')
     
     # Scan Hash DB
+    best_entry = None
     for entry in hash_db:
         p_dist = abs(entry['phash'] - p_hash)
         d_dist = abs(entry['dhash'] - d_hash)
@@ -93,6 +100,32 @@ def is_duplicate(image_path):
             if total_dist < min_hash_dist:
                 min_hash_dist = total_dist
                 hash_match = entry['path']
+                best_entry = entry
+
+    # FAST PATH: If hash match found, return immediately
+    if hash_match and best_entry:
+        # Link in Union-Find
+        if hash_match in path_to_id:
+            uf.union(curr_id, path_to_id[hash_match])
+        
+        p_dist = abs(best_entry['phash'] - p_hash)
+        d_dist = abs(best_entry['dhash'] - d_hash)
+        w_dist = abs(best_entry['whash'] - w_hash)
+        
+        reason = {
+            'method': 'Perceptual Hash (Fast Path)',
+            'score': "0.99", # High confidence/F1 for exact/near-exact hash match
+            'detail': f"""
+                <strong>Fast Match via Hash</strong><br>
+                <span style="color: green">Skipped Expensive Calculations (CLIP/ORB)</span><br>
+                <hr style="margin: 5px 0; opacity: 0.3">
+                <strong>pHash Dist:</strong> {p_dist} (Thresh: {PHASH_THRESHOLD})<br>
+                <strong>dHash Dist:</strong> {d_dist} (Thresh: {DHASH_THRESHOLD})<br>
+                <strong>wHash Dist:</strong> {w_dist} (Thresh: {WHASH_THRESHOLD})
+            """,
+            'sub_scores': ''
+        }
+        return True, hash_match, reason
 
     # 2. Check Embedding (Cluster Search)
     emb = get_robust_embedding(image_path)
@@ -150,6 +183,7 @@ def is_duplicate(image_path):
         }
         
         return True, final_match, reason
+
     # Save to DB if unique
     add_vector(emb, image_path)
     hash_db.append({
@@ -162,7 +196,7 @@ def is_duplicate(image_path):
     return False, None, None
 
 def add_image(image_path):
-    
+    """Add image to hash and embedding database manually"""
     p_hash = get_phash(image_path)
     d_hash = get_dhash(image_path)
     w_hash = get_whash(image_path)
@@ -176,7 +210,6 @@ def add_image(image_path):
         'whash': w_hash,
         'path': image_path
     })
-
 
 def check_similarity(image_path1, image_path2):
     """
@@ -223,7 +256,10 @@ def check_similarity(image_path1, image_path2):
     return confidence_score, hash_distances, is_similar, feature_score, clip_score
 
 def match_features(path1, path2):
-
+    """
+    Use ORB to find matching features between two images.
+    Returns the number of good matches using Lowe's Ratio Test.
+    """
     try:
         img1 = cv2.imread(path1, cv2.IMREAD_GRAYSCALE)
         img2 = cv2.imread(path2, cv2.IMREAD_GRAYSCALE)
