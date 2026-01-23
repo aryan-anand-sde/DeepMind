@@ -54,6 +54,44 @@ class LocalBenchmarkDB:
             return True, best_match
             
         return False, None
-    
 
+def run_benchmark(dataset_path):
+    # Extensions to look for
+    exts = ('/*.jpg', '/*.jpeg', '/*.png')
+    images = []
+    for ext in exts:
+        images.extend(glob.glob(dataset_path + ext))
     
+    # Sort to ensure consistent order (optional)
+    images.sort()
+    
+    if not images:
+        return {"error": "No images found in dataset path"}
+
+    # Limit to reasonable number for demo speed
+    images = images[:50] 
+
+    metrics = []
+
+    # --- Method 1: Pixel Matching (Baseline) ---
+    start_time = time.time()
+    matches_pixel = 0
+    seen_pixels = set()
+    
+    for img_path in images:
+        try:
+            with open(img_path, "rb") as f:
+                content = f.read()
+                if content in seen_pixels:
+                    matches_pixel += 1
+                else:
+                    seen_pixels.add(content)
+        except: pass
+    
+    time_pixel = time.time() - start_time
+
+
+
+
+
+
