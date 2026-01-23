@@ -212,7 +212,7 @@ async def get_lineage(filename:str):
 
     return {"status":"success", "cluster":cluster}
 
-
+#adding benchmark 
 from benchmark import run_benchmark
 
 @app.post("/benchmark")
@@ -245,5 +245,6 @@ async def benchmark_endpoint(folder_path: str = Form("benchmark_dataset")):
     except Exception as e:
         traceback.print_exc()
         return JSONResponse(status_code=500, content={"message": str(e)})
+
 
 app.mount("/",StaticFiles(directory="../frontend", html=True),name="frontend")
