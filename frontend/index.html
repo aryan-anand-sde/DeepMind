@@ -16,14 +16,58 @@
             <div class="subtitle">Upload an image to check for duplicates in the database.</div>
         </header>
 
-        <div class="card" id="upload-section">
-            <form id="upload-form">
-                <div class="file-drop-area">
-                    <span class="file-msg">Drag & Drop or Click to Upload</span>
-                    <input type="file" name="file" accept="image/*" required>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('upload')">Upload / Detect</button>
+            <button class="tab-btn" onclick="switchTab('benchmark')">Benchmark Stats</button>
+        </div>
+
+        <div id="upload-view" class="tab-content active">
+            <div class="card" id="upload-section">
+                <form id="upload-form">
+                    <div class="file-drop-area">
+                        <span class="file-msg">Drag & Drop or Click to Upload</span>
+                        <input type="file" name="file" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="btn" style="margin-top: 1.5rem;">Check & Upload</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="benchmark-view" class="tab-content">
+            <div class="card">
+                <h2>Model Performance Benchmark</h2>
+                <p class="subtitle" style="margin-bottom: 1.5rem;">Compare different detection algorithms on a dataset.
+                </p>
+
+                <div class="control-group">
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn" onclick="runBenchmark()" style="width: auto; margin-top: 0;">Run
+                            Benchmark</button>
+                    </div>
                 </div>
-                <button type="submit" class="btn" style="margin-top: 1.5rem;">Check & Upload</button>
-            </form>
+
+                <div id="benchmark-loading" style="display: none; text-align: center; padding: 2rem;">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 1rem; color: var(--primary-color);">Running complex analysis... This may take
+                        a minute.</p>
+                </div>
+
+                <div id="benchmark-results" style="display: none; margin-top: 2rem;">
+                    <table class="benchmark-table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Matches Found</th>
+                                <th>Speed (Total)</th>
+                                <th>Speed (per 100)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="benchmark-tbody">
+                            <!-- Rows go here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
         <div id="result-view" style="display: none; margin-top: 2rem;">
