@@ -10,7 +10,7 @@ model, _, preprocess = open_clip.create_model_and_transforms(
 model = model.to(device)
 model.eval()
 
-from hashing import normalize_image, get_five_crops
+from backend.hashing import normalize_image, get_five_crops
 
 def get_embedding(image_path):
     # Standard single-pass embedding
