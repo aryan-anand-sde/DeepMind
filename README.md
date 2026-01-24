@@ -5,16 +5,6 @@ Large-scale digital platforms (social media, e-commerce, news portals) face seri
 
 **DeepMind** is an intelligent, production-ready system designed to detect **exact duplicates and visually similar images** even after such transformations. The system combines **perceptual hashing, deep semantic embeddings (CLIP), and local feature matching (ORB)** to achieve both **speed and high accuracy**.
 
-This project was developed for **Weekend of Code 9.0 – Turing’s Playground** under the problem statement **“The Mirror of Maya”**.
-
----
-
-## Problem Statement
-**M02 – The Mirror of Maya**
-
-Design and implement a system that can identify duplicate and near-duplicate images in large-scale digital platforms, even when images have been resized, cropped, compressed, color-adjusted, or slightly edited, by detecting the original source image.
-
----
 
 ## Key Highlights
 - Detects duplicates despite **cropping, resizing, compression, and color changes**
