@@ -237,6 +237,9 @@ Open your browser at: `http://127.0.0.1:8000/`
 
 ---
 
+<img width="1436" height="1466" alt="Project Pipeline" src="https://github.com/user-attachments/assets/8673ba33-67b0-418f-be9d-64acf327033f" />
+
+
 ## License
 
 This project is developed for academic and research purposes.
